@@ -12,7 +12,7 @@ After following the web api will be running on
 http://127.0.0.1:8000/ui
 
 
-git clone https://github.com/perryvegehan/INSTA_AUDIENCE_ANALYSER.git
+git clone https://github.com/Anubhav9415/INSTA_AUDIENCE_ANALYSER.git
 cd INSTA_AUDIENCE_ANALYSER
 
 macOS / Linux
