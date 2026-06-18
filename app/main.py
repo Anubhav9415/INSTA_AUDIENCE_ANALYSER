@@ -1,11 +1,11 @@
 import csv
 import io
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from typing import List
 
 from .schemas import ClassifyRequest, ClassifyResponse, ReportResponse, Classified, Item
@@ -13,7 +13,7 @@ from .classifier import classify_text
 from .report import build_report
 from . import ig_api
 
-load_dotenv()
+load_dotenv()  # safe no-op if .env doesn't exist
 
 app = FastAPI(title="Instagram Audience Persona Analyzer", version="0.1.0")
 
@@ -26,10 +26,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve the minimal web UI — use path relative to this file so it works
-# regardless of the working directory uvicorn is launched from
-_WEB_DIR = Path(__file__).resolve().parent.parent / "web"
-app.mount("/ui", StaticFiles(directory=str(_WEB_DIR), html=True), name="web")
+# Serve the minimal web UI only when running locally (not on Vercel).
+# On Vercel, static files are served by Vercel's CDN via vercel.json routes.
+_IS_VERCEL = os.environ.get("VERCEL", "") == "1"
+if not _IS_VERCEL:
+    from fastapi.staticfiles import StaticFiles
+    _WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+    if _WEB_DIR.is_dir():
+        app.mount("/ui", StaticFiles(directory=str(_WEB_DIR), html=True), name="web")
 
 
 @app.get("/health")
